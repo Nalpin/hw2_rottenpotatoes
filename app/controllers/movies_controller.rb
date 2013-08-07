@@ -1,5 +1,12 @@
 class MoviesController < ApplicationController
 
+  before_filter :all_ratings, :only => [:index]
+
+  def all_ratings
+    @all_ratings = Movie.all_ratings
+    # debugger
+  end
+
   def show
     id = params[:id] # retrieve movie ID from URI route
     @movie = Movie.find(id) # look up movie by unique ID
@@ -7,13 +14,20 @@ class MoviesController < ApplicationController
   end
 
   def index
+    if params[:ratings]
+      @selected_ratings = params[:ratings].keys
+    else
+      @selected_ratings = @all_ratings.dup
+    end
+
     if params[:order_by]
-      @movies = Movie.order(params[:order_by])
+      @movies = Movie.find_all_by_rating(@selected_ratings, :order => params[:order_by])
       @sort_by_title = params[:order_by] == 'title'
       @sort_by_release_date = params[:order_by] == 'release_date'
     else
-      @movies = Movie.all
+      @movies = Movie.find_all_by_rating(@selected_ratings)
     end
+    # debugger
   end
 
   def new
