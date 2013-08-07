@@ -16,18 +16,25 @@ class MoviesController < ApplicationController
   def index
     if params[:ratings]
       @ratings = params[:ratings]
-      @selected_ratings = params[:ratings].keys
+      @selected_ratings = @ratings.keys
+      session[:ratings] = @ratings
     else
-      @selected_ratings = @all_ratings.dup
+      if session[:ratings]
+        @ratings = session[:ratings]
+        @selected_ratings = @ratings.keys
+      else
+        @selected_ratings = @all_ratings.dup
+      end
     end
 
     if params[:order_by]
-      @movies = Movie.find_all_by_rating(@selected_ratings, :order => params[:order_by])
-      @sort_by_title = params[:order_by] == 'title'
-      @sort_by_release_date = params[:order_by] == 'release_date'
+      session[:order_by] = params[:order_by]
     else
-      @movies = Movie.find_all_by_rating(@selected_ratings)
+      params[:order_by] = session[:order_by]
     end
+    @movies = Movie.find_all_by_rating(@selected_ratings, :order => params[:order_by])
+    @sort_by_title = params[:order_by] == 'title'
+    @sort_by_release_date = params[:order_by] == 'release_date'
     # debugger
   end
 
