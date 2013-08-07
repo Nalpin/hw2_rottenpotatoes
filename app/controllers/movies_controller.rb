@@ -22,6 +22,7 @@ class MoviesController < ApplicationController
       if session[:ratings]
         @ratings = session[:ratings]
         @selected_ratings = @ratings.keys
+        have_to_redirect = true
       else
         @selected_ratings = @all_ratings.dup
       end
@@ -30,11 +31,18 @@ class MoviesController < ApplicationController
     if params[:order_by]
       session[:order_by] = params[:order_by]
     else
-      params[:order_by] = session[:order_by]
+      if session[:order_by]
+        have_to_redirect = true
+      end
     end
-    @movies = Movie.find_all_by_rating(@selected_ratings, :order => params[:order_by])
-    @sort_by_title = params[:order_by] == 'title'
-    @sort_by_release_date = params[:order_by] == 'release_date'
+    unless have_to_redirect
+      @movies = Movie.find_all_by_rating(@selected_ratings, :order => params[:order_by])
+      @sort_by_title = params[:order_by] == 'title'
+      @sort_by_release_date = params[:order_by] == 'release_date'
+    else
+      flash.keep
+      redirect_to movies_path(:order_by => session[:order_by], :ratings => session[:ratings])
+    end
     # debugger
   end
 
