@@ -15,6 +15,7 @@ class MoviesController < ApplicationController
 
   def index
     if params[:ratings]
+      @ratings = params[:ratings]
       @selected_ratings = params[:ratings].keys
     else
       @selected_ratings = @all_ratings.dup
